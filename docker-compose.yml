@@ -1,0 +1,10 @@
+services:
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    ports:
+      - "8002:8002"
+    volumes:
+      - './:/app/'
