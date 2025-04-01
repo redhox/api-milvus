@@ -153,6 +153,16 @@ async def status_collection():
     
     data={'message':MilvusManager().status_collection()}
     print(data)
+    i=0
+    for element in data['message']:
+        if element[1]['state']==2:
+            data['message'][i][1]['state']='Loading'
+        elif element[1]['state']==3:
+            data['message'][i][1]['state']='Load'
+        elif element[1]['state']==1:
+            data['message'][i][1]['state']='NotLoad'
+
+        i=i+1
     return data
 
 @router.put("/recherche_par_similarites") 
