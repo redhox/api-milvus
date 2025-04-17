@@ -46,7 +46,7 @@ class MilvusManager:
         result = collection.search(vecteur, index, search_params, limit=n_sortie, output_fields=['id'])
         return result
 
-    def all_id(self,collection,):
+    def all_id(self,collection):
         res = self.client.query(
             collection_name=collection,
             output_fields=["id"],

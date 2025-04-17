@@ -19,7 +19,7 @@ import uuid
 import json
 from pathlib import Path
 from typing import Union
-
+from fastapi.encoders import jsonable_encoder
 router = APIRouter()
 
 def sauvegarder_donnees(chemin_fichier='suivie_datasets.json'):
@@ -149,8 +149,10 @@ class ModelRechercheSmyles(BaseModel):
 class ModelDatasets_Gen(BaseModel):
     collection:'str'
     n_sortie:int
+    direct: Union[bool, None] = None    
 class ModelSuivie(BaseModel):
     uuid:str
+
 
 @router.put("/status_collection") 
 async def status_collection():
@@ -213,13 +215,41 @@ async def recherche_par_smiles(data:ModelRechercheSmyles):
         sauvegarder_donnees()
         upload_de_datastes(liste_id,uuid_recherche)
         return {'uuid':uuid_recherche}
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.floating):
+            return float(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
+@router.put("/random_datasets") 
+async def random_datasets(data:ModelDatasets_Gen):
+    print('random_datasets',data)
+    liste_id=MilvusManager().all_id(data.collection)
+    elements_choisis = random.sample(liste_id, data.n_sortie)
+    if data.direct==True:
+        result=MilvusManager().extraction_par_id(data.collection,elements_choisis)
+        print(result[0]['smiles'])
+        # result_in_list=listresult(result)
+        # return [result]
+        
+        return json.dumps({"valeur": result}, cls=NumpyEncoder)
 
-# @router.put("/datasets_gen") 
-# async def recherche_par_smiles(data:ModelDatasets_Gen):
-#     print('datasets_gen')
-#     # liste_id=MilvusManager().all_id()
+    else:
+        liste_id=[]
+        for element in elements_choisis:
+            print(element)
+            liste_id.append(element.id)
+        uuid_recherche = str(uuid.uuid4())
+        global SUIVIE_DATASETS
+        SUIVIE_DATASETS['id']={}
+        SUIVIE_DATASETS['id'][uuid_recherche]={'progesse':'in progress'} 
+        sauvegarder_donnees()
+        upload_de_datastes(liste_id,uuid_recherche)
+        return {'uuid':uuid_recherche}
+    
+
+#     liste_id=MilvusManager().all_id()
 #     elements_choisis = random.sample(liste_id, data.n_sortie)
 #     print(elements_choisis)
 #     uuid_recherche = str(uuid.uuid4())
