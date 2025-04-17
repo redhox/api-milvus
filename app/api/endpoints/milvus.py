@@ -80,7 +80,9 @@ def listresult(result):
             'Cp': result[0][i].Cp,
             'Td': result[0][i].Td,
             'Tg': result[0][i].Tg,
-            'Tm': result[0][i].Tm}
+            'Tm': result[0][i].Tm,
+            'fingerprint': result[0][i].fingerprint
+            }
         if hasattr(result[0][i], 'distance'):
                 data['distance'] = result[0][i].distance
         liste.append(data)
@@ -136,13 +138,16 @@ class ModelRechercheGlobal(BaseModel):
     index:str
     n_sortie:int
     vecteur:list
+    collection:'str'
     direct: Union[bool, None] = None
 
 class ModelRechercheSmyles(BaseModel):
     smiles:str
     n_sortie:int
+    collection:'str'
     direct: Union[bool, None] = None
 class ModelDatasets_Gen(BaseModel):
+    collection:'str'
     n_sortie:int
 class ModelSuivie(BaseModel):
     uuid:str
@@ -169,11 +174,11 @@ async def status_collection():
 async def recherche_par_similarites(data: ModelRechercheGlobal):
     print('recherche_par_similarites',data)
     if data.direct==True:
-        result=MilvusManager().recherche_vectorielle(data.index,data.n_sortie,[data.vecteur])
+        result=MilvusManager().recherche_vectorielle(data.collection,data.index,data.n_sortie,[data.vecteur])
         result_in_list=listresult(result)
         return {result_in_list}
     else:
-        result=MilvusManager().recherche_vectorielle_id(data.index,data.n_sortie,[data.vecteur])
+        result=MilvusManager().recherche_vectorielle_id(data.collection,data.index,data.n_sortie,[data.vecteur])
         liste_id=[]
         for element in result[0]:
             print(element)
@@ -192,11 +197,11 @@ async def recherche_par_smiles(data:ModelRechercheSmyles):
     vecteur = smiles2fingerprint(data.smiles)
     print(vecteur[0])
     if data.direct==True:
-        result=MilvusManager().recherche_vectorielle('fingerprint',data.n_sortie,[vecteur])
+        result=MilvusManager().recherche_vectorielle(data.collection,'fingerprint',data.n_sortie,[vecteur])
         result_in_list=listresult(result)
         return result_in_list
     else:
-        result=MilvusManager().recherche_vectorielle_id('fingerprint',data.n_sortie,[vecteur])
+        result=MilvusManager().recherche_vectorielle_id(data.collection,'fingerprint',data.n_sortie,[vecteur])
         liste_id=[]
         for element in result[0]:
             print(element)
@@ -211,19 +216,19 @@ async def recherche_par_smiles(data:ModelRechercheSmyles):
 
 
 
-@router.put("/datasets_gen") 
-async def recherche_par_smiles(data:ModelDatasets_Gen):
-    print('datasets_gen')
-    liste_id=MilvusManager().all_id()
-    elements_choisis = random.sample(liste_id, data.n_sortie)
-    print(elements_choisis)
-    uuid_recherche = str(uuid.uuid4())
-    global SUIVIE_DATASETS
-    SUIVIE_DATASETS['id']={}
-    SUIVIE_DATASETS['id'][uuid_recherche]={'progesse':'in progress'}
-    sauvegarder_donnees()
-    upload_de_datastes(elements_choisis,uuid_recherche)
-    return {'uuid':uuid_recherche}
+# @router.put("/datasets_gen") 
+# async def recherche_par_smiles(data:ModelDatasets_Gen):
+#     print('datasets_gen')
+#     # liste_id=MilvusManager().all_id()
+#     elements_choisis = random.sample(liste_id, data.n_sortie)
+#     print(elements_choisis)
+#     uuid_recherche = str(uuid.uuid4())
+#     global SUIVIE_DATASETS
+#     SUIVIE_DATASETS['id']={}
+#     SUIVIE_DATASETS['id'][uuid_recherche]={'progesse':'in progress'}
+#     sauvegarder_donnees()
+#     upload_de_datastes(elements_choisis,uuid_recherche)
+#     return {'uuid':uuid_recherche}
 
 
 

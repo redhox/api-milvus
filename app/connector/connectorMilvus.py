@@ -25,18 +25,18 @@ class MilvusManager:
             data.append([element,self.client.get_load_state(collection_name=element)])
         return data
 
-    def recherche_vectorielle(self,index,n_sortie,vecteur):
-        collection = Collection(os.getenv('MILVUS_COLLECTION'))
+    def recherche_vectorielle(self,collection,index,n_sortie,vecteur):
+        collection = Collection(collection)
         search_params = {
             "metric_type": "L2",
             # "metric_type": "COSINE",
             "params": {"nprobe": 20},
         }
         
-        result = collection.search(vecteur, index, search_params, limit=n_sortie, output_fields=['smiles', 'filename', 'Egc', 'Egb', 'Eib', 'CED', 'Ei', 'Eea', 'nc', 'ne', 'epse_6_0', 'epsc', 'epse_3_0', 'epse_1_78', 'epse_15_0', 'epse_4_0', 'epse_5_0', 'epse_2_0', 'epse_9_0', 'epse_7_0', 'TSb', 'TSy', 'epsb', 'YM', 'permCH4', 'permCO2', 'permH2', 'permO2', 'permN2', 'permHe', 'Eat', 'rho', 'LOI', 'Xc', 'Xe', 'Cp', 'Td', 'Tg', 'Tm'])
+        result = collection.search(vecteur, index, search_params, limit=n_sortie, output_fields=['smiles', 'filename', 'Egc', 'Egb', 'Eib', 'CED', 'Ei', 'Eea', 'nc', 'ne', 'epse_6_0', 'epsc', 'epse_3_0', 'epse_1_78', 'epse_15_0', 'epse_4_0', 'epse_5_0', 'epse_2_0', 'epse_9_0', 'epse_7_0', 'TSb', 'TSy', 'epsb', 'YM', 'permCH4', 'permCO2', 'permH2', 'permO2', 'permN2', 'permHe', 'Eat', 'rho', 'LOI', 'Xc', 'Xe', 'Cp', 'Td', 'Tg', 'Tm','fingerprint'])
         return result
-    def recherche_vectorielle_id(self,index,n_sortie,vecteur):
-        collection = Collection(os.getenv('MILVUS_COLLECTION'))
+    def recherche_vectorielle_id(self,collection,index,n_sortie,vecteur):
+        collection = Collection(collection)
         search_params = {
             "metric_type": "L2",
             # "metric_type": "COSINE",
@@ -46,9 +46,9 @@ class MilvusManager:
         result = collection.search(vecteur, index, search_params, limit=n_sortie, output_fields=['id'])
         return result
 
-    def all_id(self):
+    def all_id(self,collection,):
         res = self.client.query(
-            collection_name=os.getenv('MILVUS_COLLECTION'),
+            collection_name=collection,
             output_fields=["id"],
             filter="id >= 0"
         )   
@@ -56,10 +56,10 @@ class MilvusManager:
         for element in res:
             liste_id.append(element['id'])
         return liste_id
-    def extraction_par_id(self,list_id):
+    def extraction_par_id(self,collection,list_id):
         res = self.client.get(
-        collection_name=os.getenv('MILVUS_COLLECTION'),
+        collection_name=collection,
         ids=list_id,
-        output_fields=['smiles', 'filename', 'Egc', 'Egb', 'Eib', 'CED', 'Ei', 'Eea', 'nc', 'ne', 'epse_6_0', 'epsc', 'epse_3_0', 'epse_1_78', 'epse_15_0', 'epse_4_0', 'epse_5_0', 'epse_2_0', 'epse_9_0', 'epse_7_0', 'TSb', 'TSy', 'epsb', 'YM', 'permCH4', 'permCO2', 'permH2', 'permO2', 'permN2', 'permHe', 'Eat', 'rho', 'LOI', 'Xc', 'Xe', 'Cp', 'Td', 'Tg', 'Tm']
+        output_fields=['smiles', 'filename', 'Egc', 'Egb', 'Eib', 'CED', 'Ei', 'Eea', 'nc', 'ne', 'epse_6_0', 'epsc', 'epse_3_0', 'epse_1_78', 'epse_15_0', 'epse_4_0', 'epse_5_0', 'epse_2_0', 'epse_9_0', 'epse_7_0', 'TSb', 'TSy', 'epsb', 'YM', 'permCH4', 'permCO2', 'permH2', 'permO2', 'permN2', 'permHe', 'Eat', 'rho', 'LOI', 'Xc', 'Xe', 'Cp', 'Td', 'Tg', 'Tm','fingerprint']
         )
         return res
