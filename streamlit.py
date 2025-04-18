@@ -4,7 +4,39 @@ import numpy as np
 import requests
 import json
 import pandas as pd
+
+import streamlit as st
+from streamlit_ketcher import st_ketcher
+
+import streamlit as st
+from rdkit import Chem
+from rdkit.Chem import Draw
+import matplotlib.pyplot as plt
+from io import BytesIO
+
+
 SERVER_URL='https://api.morgan-coulm.fr'
+
+def afficher_molecule(smiles):
+    # Convertir SMILES en molécule
+    mol = Chem.MolFromSmiles(smiles)
+    
+    if mol is None:
+        st.error("SMILES invalide")
+        return
+    
+    # Créer l'image de la molécule
+    img = Draw.MolToImage(mol)
+    
+    # Convertir l'image en buffer mémoire
+    buffered = BytesIO()
+    img.save(buffered, format='PNG')
+    img_str = buffered.getvalue()
+    
+    # Afficher l'image dans Streamlit
+    st.image(img_str)
+
+
 
 def rechercheparsmile(smiles,n):
     headers = {
@@ -72,19 +104,24 @@ smiles_randome=st.session_state.smiles_randome
 smiles_depart = st.selectbox("Sélectionnez un élément :", smiles_randome)
 print('un')
 if smiles_depart !="":
+
     print('truc')
     st.write(smiles_depart)
+    afficher_molecule(smiles_depart)
     st.write("generation de smiles")
     # st.write(generationdecandidat(10))
     print('un truc ?')
     liste_proche_voisin=[]
-    for element in generationdecandidat(10):
+    resulta_model=generationdecandidat(10)
+    for element in resulta_model:
         liste_proche_voisin.append(rechercheparsmile(element,1)[0])
     df=pd.DataFrame(liste_proche_voisin)
     st.dataframe(df)
 
 
-
+    for element in liste_proche_voisin:
+        # print(element)
+        afficher_molecule(element["smiles"])
 
 
 # st.header("recherche des plus proche voisin avec l'api milvus")
