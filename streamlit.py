@@ -4,7 +4,7 @@ import numpy as np
 import requests
 import json
 import pandas as pd
-SERVER_URL='http://localhost:8002'
+SERVER_URL='https://api.morgan-coulm.fr'
 
 def rechercheparsmile(smiles,n):
     headers = {
