@@ -13,7 +13,8 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 import matplotlib.pyplot as plt
 from io import BytesIO
-
+import plotly.express as px
+from sklearn.decomposition import PCA
 
 SERVER_URL='https://api.morgan-coulm.fr'
 
@@ -69,6 +70,19 @@ def random_smiles(n):
     for element in result['valeur']:
         liste_smiles.append(element["smiles"])
     return liste_smiles
+def random_datasets(n):
+    headers = {
+    'accept': 'application/json',
+    'Content-Type': 'application/json'
+    }
+    data={
+    "n_sortie": n,
+    "collection":'filtre1',
+    "direct": True
+    }
+    reponse = requests.put(f'{SERVER_URL}/milvus/random_datasets', json=data, headers=headers) 
+    result = json.loads(reponse.json())
+    return result
 def generationdecandidat(n):
     liste=[
         "[*]N1C(=O)c2ccc(Nc3ccc4oc(-c5ccc6c(c5)C(=O)N(c5ccc(-c7cccc8c7C(=O)N([*])C8=O)cc5)C6=O)nc4c3)cc2C1=O",
@@ -82,9 +96,57 @@ def generationdecandidat(n):
         "[*]Oc1ccc(Oc2ccc([*])cc2C(F)(F)F)cc1-c1ccc(C)cc1",
         "[*]c1cccc(-c2ccc(-c3nnc(-c4nnc(N5C(=O)c6ccc(-c7ccc8c(c7)C(=O)N([*])C8=O)cc6C5=O)o4)o3)cc2)c1"]
     return liste
+def button_interaction(smiles):
+    if st.button(smiles):        
+        liste_proche_voisin=[]
+        resulta_model=generationdecandidat(10)
+        for element in resulta_model:
+            liste_proche_voisin.append(rechercheparsmile(element,1)[0])
+        df_result=pd.DataFrame(liste_proche_voisin)
+        df_result=df_result[["smiles","fingerprint","permN2"]]
+        df_voisin=pd.DataFrame()
+        for element in resulta_model:
+            results=rechercheparsmile(element,11)
+            # smiles = [{'smiles': r} for r in results['smiles']]
+            # vectors = [{'fingerprint': r} for r in results['fingerprint']]
+            # permN2 = [{'permN2': r} for r in results['permN2']]
+            
+            vectors = [res["fingerprint"] for res in results]
+            permN2 = [res["permN2"] for res in results]
+            smiles = [res["smiles"] for res in results]
+            # df_voisin_bis=listen
+            df_voisin_bis = pd.DataFrame({
+                'smiles':smiles,
+                'fingerprint':vectors,
+                'permN2': permN2,
+                'source':'voisin'
+                })
+            df_voisin = pd.concat([df_voisin, df_voisin_bis], ignore_index=True)
+        
+        # for element in liste_proche_voisin:
+        #     afficher_molecule(element["smiles"])
+        df_bdd=pd.DataFrame(random_datasets(1000)['valeur'])
+        df_bdd=df_bdd[["smiles","fingerprint","permN2"]]
+        df_result["source"]="result"
+        df_bdd['source']="bdd"
 
-
-
+        df = pd.concat([df_bdd, df_voisin,df_result], ignore_index=True)
+        X = np.array(df['fingerprint'].tolist())
+        pca = PCA(n_components=2)
+        X_3D = pca.fit_transform(X)
+        df['pca_x'] = X_3D[:, 0] 
+        df['pca_y'] = X_3D[:, 1]  
+        fig = px.scatter_3d(df ,
+            x='pca_x', y='pca_y', z='permN2',color='source',
+            title="Visualisation 3D des vecteurs Milvus"
+        )
+        fig.update_traces(marker_size=2)
+        # fig.show()
+        st.plotly_chart(fig, use_container_width=True)
+        st.write('les smiles les plus proche des resultats')
+        st.dataframe(df[df['source'] == 'result'])
+        st.write('les 10 plus proche des resultats')
+        st.dataframe(df[df['source'] == 'voisin'])
 # Configuration de la page
 st.set_page_config(page_title="Application streamlit", layout="wide")
 
@@ -93,7 +155,6 @@ if 'smiles_randome' not in st.session_state:
 
 # Titre principal
 st.title("Application Streamlit ")
-print('un  ?')
 st.subheader("5 smiles alleatoirs")
 if st.button('Cliquez-moi'):
     smiles_randome=random_smiles(5)
@@ -101,27 +162,30 @@ if st.button('Cliquez-moi'):
     st.session_state.smiles_randome = smiles_randome
 
 smiles_randome=st.session_state.smiles_randome
-smiles_depart = st.selectbox("Sélectionnez un élément :", smiles_randome)
-print('un')
-if smiles_depart !="":
-
-    print('truc')
-    st.write(smiles_depart)
-    afficher_molecule(smiles_depart)
-    st.write("generation de smiles")
-    # st.write(generationdecandidat(10))
-    print('un truc ?')
-    liste_proche_voisin=[]
-    resulta_model=generationdecandidat(10)
-    for element in resulta_model:
-        liste_proche_voisin.append(rechercheparsmile(element,1)[0])
-    df=pd.DataFrame(liste_proche_voisin)
-    st.dataframe(df)
 
 
-    for element in liste_proche_voisin:
-        # print(element)
-        afficher_molecule(element["smiles"])
+
+for element in smiles_randome:
+    if element != "":
+        afficher_molecule(element)
+        button_interaction(element)
+# smiles_depart = st.selectbox("Sélectionnez un élément :", smiles_randome)
+# if smiles_depart !="":
+
+#     st.write(smiles_depart)
+#     afficher_molecule(smiles_depart)
+#     st.write("generation de smiles")
+#     # st.write(generationdecandidat(10))
+#     liste_proche_voisin=[]
+#     resulta_model=generationdecandidat(10)
+#     for element in resulta_model:
+#         liste_proche_voisin.append(rechercheparsmile(element,1)[0])
+#     df=pd.DataFrame(liste_proche_voisin)
+#     st.dataframe(df)
+
+
+#     for element in liste_proche_voisin:
+#         afficher_molecule(element["smiles"])
 
 
 # st.header("recherche des plus proche voisin avec l'api milvus")
