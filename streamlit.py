@@ -4,11 +4,6 @@ import numpy as np
 import requests
 import json
 import pandas as pd
-
-import streamlit as st
-from streamlit_ketcher import st_ketcher
-
-import streamlit as st
 from rdkit import Chem
 from rdkit.Chem import Draw
 import matplotlib.pyplot as plt
