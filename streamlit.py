@@ -42,7 +42,7 @@ def rechercheparsmile(smiles,n):
     data={
         "smiles":smiles,
     "n_sortie": n,
-    "collection":'filtre1',
+    "collection":'filtre2',
     "direct": True
     }
     reponse = requests.put(f'{SERVER_URL}/milvus/recherche_par_smiles', json=data, headers=headers) 
@@ -56,7 +56,7 @@ def random_smiles(n):
     }
     data={
     "n_sortie": n,
-    "collection":'filtre1',
+    "collection":'filtre2',
     "direct": True
     }
     reponse = requests.put(f'{SERVER_URL}/milvus/random_datasets', json=data, headers=headers) 
@@ -72,7 +72,7 @@ def random_datasets(n):
     }
     data={
     "n_sortie": n,
-    "collection":'filtre1',
+    "collection":'filtre2',
     "direct": True
     }
     reponse = requests.put(f'{SERVER_URL}/milvus/random_datasets', json=data, headers=headers) 
@@ -142,14 +142,16 @@ def button_interaction(smiles):
         st.dataframe(df[df['source'] == 'result'])
         st.write('les 10 plus proche des resultats')
         st.dataframe(df[df['source'] == 'voisin'])
-# Configuration de la page
+
+
+
 st.set_page_config(page_title="Application streamlit", layout="wide")
 
 if 'smiles_randome' not in st.session_state:
     st.session_state.smiles_randome = [""]
 
-# Titre principal
 st.title("Application Streamlit ")
+
 st.subheader("5 smiles alleatoirs")
 if st.button('Cliquez-moi'):
     smiles_randome=random_smiles(5)
@@ -164,40 +166,3 @@ for element in smiles_randome:
     if element != "":
         afficher_molecule(element)
         button_interaction(element)
-# smiles_depart = st.selectbox("Sélectionnez un élément :", smiles_randome)
-# if smiles_depart !="":
-
-#     st.write(smiles_depart)
-#     afficher_molecule(smiles_depart)
-#     st.write("generation de smiles")
-#     # st.write(generationdecandidat(10))
-#     liste_proche_voisin=[]
-#     resulta_model=generationdecandidat(10)
-#     for element in resulta_model:
-#         liste_proche_voisin.append(rechercheparsmile(element,1)[0])
-#     df=pd.DataFrame(liste_proche_voisin)
-#     st.dataframe(df)
-
-
-#     for element in liste_proche_voisin:
-#         afficher_molecule(element["smiles"])
-
-
-# st.header("recherche des plus proche voisin avec l'api milvus")
-
-# # Section 1 : Entrées utilisateur
-# st.subheader("Zone d'entrée de smiles")
-# smiles = st.text_input("Entrez votre nom :", placeholder="Jean Dupont")
-# if smiles:
-#     st.subheader("📋 Liste de sélection")
-#     result=rechercheparsmile(smiles)
-    
-#     liste_plus_proche_smiles = [element['smiles'] for element in result]
-#     liste_plus_proche_full={element['smiles']:element for element in result}
-#     liste_plus_proche_smiles=[""]+liste_plus_proche_smiles
-#     selection = st.selectbox("Sélectionnez un élément :", liste_plus_proche_smiles)
-
-#     if selection !="":
-#         st.write(liste_plus_proche_full[selection])
-
-
