@@ -120,7 +120,7 @@ def button_interaction(smiles):
         
         # for element in liste_proche_voisin:
         #     afficher_molecule(element["smiles"])
-        df_bdd=pd.DataFrame(random_datasets(1000)['valeur'])
+        df_bdd=pd.DataFrame(random_datasets(100)['valeur'])
         df_bdd=df_bdd[["smiles","fingerprint","permN2"]]
         df_result["source"]="result"
         df_bdd['source']="bdd"
@@ -133,7 +133,8 @@ def button_interaction(smiles):
         df['pca_y'] = X_3D[:, 1]  
         fig = px.scatter_3d(df ,
             x='pca_x', y='pca_y', z='permN2',color='source',
-            title="Visualisation 3D des vecteurs Milvus"
+            title="Visualisation 3D des vecteurs Milvus",
+            hover_name='smiles',
         )
         fig.update_traces(marker_size=2)
         # fig.show()
