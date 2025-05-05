@@ -81,6 +81,7 @@ def listresult(result):
             'Td': result[0][i].Td,
             'Tg': result[0][i].Tg,
             'Tm': result[0][i].Tm,
+            'embedding': result[0][i].embedding,
             'fingerprint': result[0][i].fingerprint
             }
         if hasattr(result[0][i], 'distance'):
