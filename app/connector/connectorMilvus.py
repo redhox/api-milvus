@@ -60,6 +60,6 @@ class MilvusManager:
         res = self.client.get(
         collection_name=collection,
         ids=list_id,
-        output_fields=['smiles', 'filename', 'Egc', 'Egb', 'Eib', 'CED', 'Ei', 'Eea', 'nc', 'ne', 'epse_6_0', 'epsc', 'epse_3_0', 'epse_1_78', 'epse_15_0', 'epse_4_0', 'epse_5_0', 'epse_2_0', 'epse_9_0', 'epse_7_0', 'TSb', 'TSy', 'epsb', 'YM', 'permCH4', 'permCO2', 'permH2', 'permO2', 'permN2', 'permHe', 'Eat', 'rho', 'LOI', 'Xc', 'Xe', 'Cp', 'Td', 'Tg', 'Tm','fingerprint']
+        output_fields=['smiles', 'filename', 'Egc', 'Egb', 'Eib', 'CED', 'Ei', 'Eea', 'nc', 'ne', 'epse_6_0', 'epsc', 'epse_3_0', 'epse_1_78', 'epse_15_0', 'epse_4_0', 'epse_5_0', 'epse_2_0', 'epse_9_0', 'epse_7_0', 'TSb', 'TSy', 'epsb', 'YM', 'permCH4', 'permCO2', 'permH2', 'permO2', 'permN2', 'permHe', 'Eat', 'rho', 'LOI', 'Xc', 'Xe', 'Cp', 'Td', 'Tg', 'Tm','fingerprint','embedding']
         )
         return res
