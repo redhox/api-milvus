@@ -137,7 +137,6 @@ def button_interaction(smiles):
             hover_name='smiles',
         )
         fig.update_traces(marker_size=2)
-        # fig.show()
         st.plotly_chart(fig, use_container_width=True)
         st.write('les smiles les plus proche des resultats')
         st.dataframe(df[df['source'] == 'result'])

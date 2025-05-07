@@ -20,8 +20,9 @@ import json
 from pathlib import Path
 from typing import Union
 from fastapi.encoders import jsonable_encoder
+from app.api.smiles2embeddings import ModelChemBERTa
 router = APIRouter()
-
+ModelChemBERTa()
 def sauvegarder_donnees(chemin_fichier='suivie_datasets.json'):
     """Sauvegarde le dictionnaire SUIVIE_DATASETS dans un fichier JSON"""
     with open(chemin_fichier, 'w', encoding='utf-8') as f:
@@ -196,14 +197,16 @@ async def recherche_par_similarites(data: ModelRechercheGlobal):
 @router.put("/recherche_par_smiles") 
 async def recherche_par_smiles(data:ModelRechercheSmyles):
     print('recherche_par_smiles') 
-    vecteur = smiles2fingerprint(data.smiles)
-    print(vecteur[0])
+    # vecteur = smiles2fingerprint(data.smiles)
+    vecteur = ModelChemBERTa().smiles2embeding_cls(data.smiles)
+    vecteur=vecteur.numpy().tolist()[0]
+    # print(vecteur[0])
     if data.direct==True:
-        result=MilvusManager().recherche_vectorielle(data.collection,'fingerprint',data.n_sortie,[vecteur])
+        result=MilvusManager().recherche_vectorielle(data.collection,'embedding_bert',data.n_sortie,[vecteur])
         result_in_list=listresult(result)
         return result_in_list
     else:
-        result=MilvusManager().recherche_vectorielle_id(data.collection,'fingerprint',data.n_sortie,[vecteur])
+        result=MilvusManager().recherche_vectorielle_id(data.collection,'embedding_bert',data.n_sortie,[vecteur])
         liste_id=[]
         for element in result[0]:
             print(element)
